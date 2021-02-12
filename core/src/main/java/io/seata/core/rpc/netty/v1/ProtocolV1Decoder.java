@@ -74,6 +74,9 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         int lengthFieldLength,  FullLength is int(4B). so values is 4
         int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
+
+         第三个值之所以是 -7 是因为 FullLength 包括了 16个头部字节 + HeadMap Size + Body Size
+         然后 netty 读取的时候 会 FullLength + offset + 长度域的长度  但是 Full Length 已经包括了 所以要 - 7 就行
         */
         super(maxFrameLength, 3, 4, -7, 0);
     }

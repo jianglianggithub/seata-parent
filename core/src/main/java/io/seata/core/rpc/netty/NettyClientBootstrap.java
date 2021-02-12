@@ -128,8 +128,9 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                     LOGGER.info("client run on macOS");
                 }
             } else {
-                bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                    .option(EpollChannelOption.TCP_QUICKACK, true);
+                bootstrap
+                        .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
+                         .option(EpollChannelOption.TCP_QUICKACK, true);
             }
         }
 
@@ -139,9 +140,12 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 public void initChannel(SocketChannel ch) {
                     ChannelPipeline pipeline = ch.pipeline();
                     pipeline.addLast(
-                        new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                            nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                            nettyClientConfig.getChannelMaxAllIdleSeconds()))
+                            new IdleStateHandler(
+                                    nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                    nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                    nettyClientConfig.getChannelMaxAllIdleSeconds()
+                            )
+                    )
                         .addLast(new ProtocolV1Decoder())
                         .addLast(new ProtocolV1Encoder());
                     if (channelHandlers != null) {

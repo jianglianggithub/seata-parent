@@ -27,8 +27,12 @@ import java.util.Map;
  */
 public class RpcMessage {
 
+
+    // 全局id
     private int id;
+    // 异步还是同步
     private byte messageType;
+    // 编解码类型 默认seata自带的编解码器
     private byte codec;
     // 压缩
     private byte compressor;

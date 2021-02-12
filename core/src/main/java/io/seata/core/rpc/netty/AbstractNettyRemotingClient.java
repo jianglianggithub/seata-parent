@@ -127,6 +127,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
+        // 通过一个定时任务 去检测未收到消息的 futrue防止 内存泄漏
         super.init();
         clientBootstrap.start();
 

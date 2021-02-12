@@ -20,6 +20,9 @@ import io.seata.core.protocol.AbstractMessage;
 /**
  * The type Netty pool key.
  *
+ *  这个组件 是 apache 内存池 的自定义key 相当于 通过 address 与 对应的 serverChannel 进行了绑定
+ *  并且同一个时刻只允许一个线程操作 【正规情况下】
+ *
  * @author slievrly
  */
 public class NettyPoolKey {

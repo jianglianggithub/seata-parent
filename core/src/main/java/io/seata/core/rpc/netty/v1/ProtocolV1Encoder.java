@@ -73,7 +73,8 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 byte messageType = rpcMessage.getMessageType();
                 out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
                 out.writeByte(ProtocolConstants.VERSION);
-                // full Length(4B) and head length(2B) will fix in the end. 
+                // full Length(4B) and head length(2B) will fix in the end.
+                //  这6个字节代表 headMap 长度 和 消息全长head+ headMap + body
                 out.writerIndex(out.writerIndex() + 6);
                 out.writeByte(messageType);
                 out.writeByte(rpcMessage.getCodec());
@@ -89,10 +90,12 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 }
 
                 byte[] bodyBytes = null;
+                // 如果不是只有头的消息 【各种状态传输确实不需要body  心跳等等】， 不是 响应的消息
                 if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
-                    Serializer serializer = EnhancedServiceLoader.load(Serializer.class, SerializerType.getByCode(rpcMessage.getCodec()).name());
+                    Serializer serializer = EnhancedServiceLoader.load(Serializer.class,
+                            SerializerType.getByCode(rpcMessage.getCodec()).name());
                     bodyBytes = serializer.serialize(rpcMessage.getBody());
                     Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                     bodyBytes = compressor.compress(bodyBytes);
