@@ -227,7 +227,10 @@ public class TransactionalTemplate {
         try {
             // 钩子
             triggerBeforeBegin();
+
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
+
+
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,

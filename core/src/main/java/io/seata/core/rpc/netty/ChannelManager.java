@@ -44,19 +44,29 @@ import java.util.concurrent.ConcurrentMap;
 public class ChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelManager.class);
+    // 缓存 client  和 客户端角色 版本 等元信息
+    // 一个客户端 会将自己注册城 TM 和RM 也就是 一个 jvm seata 进程将 与 seataServer 注册2个channel
     private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> RpcContext
      */
-    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String,
-        ConcurrentMap<Integer, RpcContext>>>> RM_CHANNELS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String,
+                                                ConcurrentMap<String,
+                                                        ConcurrentMap<String,
+                                                                ConcurrentMap<Integer, RpcContext>
+                                                                >
+                                                        >
+
+                                        > RM_CHANNELS = new ConcurrentHashMap<>();
 
     /**
-     * ip+appname,port
+     * appname:ip,port
+     *
+     *  第一个key 是 Spring.application.name:ip 第二个key 是port
+     *
      */
-    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
-        = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * Is registered boolean.
@@ -116,20 +126,35 @@ public class ChannelManager {
     /**
      * Register tm channel.
      *
+     *
      * @param request the request
      * @param channel the channel
      * @throws IncompatibleVersionException the incompatible version exception
      */
     public static void registerTMChannel(RegisterTMRequest request, Channel channel)
         throws IncompatibleVersionException {
+        // 检测客户端版本是否匹配
         Version.checkVersion(request.getVersion());
-        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
-            request.getApplicationId(),
-            request.getTransactionServiceGroup(),
-            null, channel);
+
+        RpcContext rpcContext = buildChannelHolder(
+                NettyPoolKey.TransactionRole.TMROLE,
+                request.getVersion(),
+                request.getApplicationId(),
+                request.getTransactionServiceGroup(),
+                null,
+                channel
+        );
+        // 缓存其他client 信息 并且 register 自己
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-            + ChannelUtil.getClientIpFromChannel(channel);
+
+        // 这里的 appid = spring.application.name:ip 是服务名 可能存在多个节点 采用同一服务名
+        String clientIdentified =
+                        rpcContext.getApplicationId() +
+                        Constants.CLIENT_ID_SPLIT_CHAR +
+                        ChannelUtil.getClientIpFromChannel(channel);
+
+
+        System.out.println("tm client 注册了 clientIdentified = " + clientIdentified);
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
             clientIdentified, key -> new ConcurrentHashMap<>());
         rpcContext.holdInClientChannels(clientIdentifiedMap);
@@ -137,6 +162,7 @@ public class ChannelManager {
 
     /**
      * Register rm channel.
+     * 注册rm的时候如果没有resourceId 会直接注册全部注册到 全局缓存中
      *
      * @param resourceManagerRequest the resource manager request
      * @param channel                the channel
@@ -148,18 +174,25 @@ public class ChannelManager {
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
-                resourceManagerRequest.getApplicationId(), resourceManagerRequest.getTransactionServiceGroup(),
-                resourceManagerRequest.getResourceIds(), channel);
+            rpcContext = buildChannelHolder(
+                    NettyPoolKey.TransactionRole.RMROLE,
+                    resourceManagerRequest.getVersion(),
+                    resourceManagerRequest.getApplicationId(),
+                    resourceManagerRequest.getTransactionServiceGroup(),
+                    resourceManagerRequest.getResourceIds(),
+                    channel
+            );
             rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         } else {
             rpcContext = IDENTIFIED_CHANNELS.get(channel);
             rpcContext.addResources(dbkeySet);
         }
         if (dbkeySet == null || dbkeySet.isEmpty()) { return; }
+
         for (String resourceId : dbkeySet) {
             String clientIp;
-            ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
+            ConcurrentMap<Integer, RpcContext> portMap =
+                    CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(resourceManagerRequest.getApplicationId(), key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(clientIp = ChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
 
@@ -213,6 +246,13 @@ public class ChannelManager {
     /**
      * Gets get same income client channel.
      *
+     *
+     *  这个操作我大概是知道为啥了。。。 因为 Tm 会不断重连
+     *  可能之前的channel 中断了。 那么就通过获取 rpcContext中的信息 重新拿到channel 发送回去。。
+     *
+     *  如果这个channel 不活跃了 那么 删除 tmMap 中的缓存  和 资源id - appname - 对应这个融到port 中的 缓存
+     *  如果是rm 那么返回相同appname + ip 不同 port 下的实例 给这个实例发送消息？？？？ wtf？？？？？？
+     *
      * @param channel the channel
      * @return the get same income client channel
      */
@@ -229,6 +269,8 @@ public class ChannelManager {
             // recheck
             return rpcContext.getChannel();
         }
+
+
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         NettyPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
         if (clientRole == NettyPoolKey.TransactionRole.TMROLE) {
@@ -264,6 +306,24 @@ public class ChannelManager {
             }
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("1",new Object());
+        stringObjectHashMap.put("2",new Object());
+        stringObjectHashMap.put("3",new Object());
+        stringObjectHashMap.put("4",new Object());
+        stringObjectHashMap.put("5",new Object());
+        stringObjectHashMap.put("6",new Object());
+
+
+        for (Map.Entry<String, Object> entry : stringObjectHashMap.entrySet()) {
+            if (entry.getKey().equals("4")) {
+                stringObjectHashMap.remove("4");
+            }
+        }
+
     }
 
     /**

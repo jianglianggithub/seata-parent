@@ -54,8 +54,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
 
+    // xid = 开启一个事务后 生成的 seataServerIP + port + transactionId
     private String xid;
 
+    // 一个自增id
     private long transactionId;
 
     private volatile GlobalStatus status;

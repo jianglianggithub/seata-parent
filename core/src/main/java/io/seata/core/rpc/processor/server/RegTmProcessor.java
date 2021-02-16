@@ -64,7 +64,9 @@ public class RegTmProcessor implements RemotingProcessor {
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
+            // 这个是预留出来的 authHandler 但是默认没有实现 直接返回ture
             if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
+                // 缓存tm client 信息
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

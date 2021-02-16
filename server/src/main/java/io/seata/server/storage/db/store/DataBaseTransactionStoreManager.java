@@ -67,7 +67,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     protected LogStore logStore;
 
     /**
-     * The Log query limit.
+     * The Log query limit. db模式查询全局事务一次的最大条数
      */
     protected int logQueryLimit;
 

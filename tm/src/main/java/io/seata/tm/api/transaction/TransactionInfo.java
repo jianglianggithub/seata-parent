@@ -28,6 +28,7 @@ public final class TransactionInfo implements Serializable {
     // 开启全局事务的超时时间
     private int timeOut;
 
+    // 这个name 是 注解上 指定的暂时不知道是有什么作用
     private String name;
 
     private Set<RollbackRule> rollbackRules;

@@ -94,6 +94,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+
+
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
@@ -106,9 +109,13 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
         }
+
         if (!(message instanceof AbstractMessage)) {
             return;
         }
+
+
+        // 如果是合并消息
         if (message instanceof MergedWarpMessage) {
             AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
             for (int i = 0; i < results.length; i++) {

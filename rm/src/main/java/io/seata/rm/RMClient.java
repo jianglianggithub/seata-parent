@@ -31,9 +31,13 @@ public class RMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
-        RmNettyRemotingClient rmNettyRemotingClient = RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        RmNettyRemotingClient rmNettyRemotingClient =
+                RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+
+        /* 这2个东西不知道是干嘛的  */
         rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
         rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
+
         rmNettyRemotingClient.init();
     }
 

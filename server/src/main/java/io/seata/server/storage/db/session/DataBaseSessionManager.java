@@ -52,6 +52,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     /**
      * The Task name.
+     * 这个taskName 是在初始化 seesionStore 的时候 传入的 是异步提交等等 有3个状态 不知道是干嘛的
+     * 一个root 是没有taskName
      */
     protected String taskName;
 

@@ -82,12 +82,13 @@ public class Server {
         // 初始化全局唯一id生成器  参数应该是一个种子防止重复的种子
         UUIDGenerator.init(parameterParser.getServerNode());
 
-        // 初始化 存储模型
+        // 初始化 存储模型  一般配置中写的是为db
         SessionHolder.init(parameterParser.getStoreMode());
 
         DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
+
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);

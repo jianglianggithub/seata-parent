@@ -81,7 +81,8 @@ public abstract class AbstractExceptionHandler {
 
     }
 
-    public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
+    public abstract static class AbstractCallback
+            <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
         implements Callback<T, S> {
 
         @Override
@@ -111,7 +112,10 @@ public abstract class AbstractExceptionHandler {
      * @param request  the request
      * @param response the response
      */
-    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
+    public
+    <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
+    void
+    exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);

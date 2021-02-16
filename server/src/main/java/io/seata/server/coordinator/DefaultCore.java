@@ -123,13 +123,16 @@ public class DefaultCore implements Core {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
-        GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
-            timeout);
+        // 创建一个事务会话信息
+        GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name, timeout);
+
+        // 设置 seata server 配置的 数据存储方式 默认是file 配置的db 就是 全局事务信息 等等 存储的地方
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
+        // 开启begin 后 往db 插入一个begin 纪录
         session.begin();
 
-        // transaction start event
+        // transaction start event  发布一个事件 默认是没有 subscriber的
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 

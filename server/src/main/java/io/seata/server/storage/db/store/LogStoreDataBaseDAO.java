@@ -82,6 +82,7 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     private String dbType;
 
+    // 这个是 global_table.transaction_name 字段的长度信息
     private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
 
     /**
@@ -442,6 +443,7 @@ public class LogStoreDataBaseDAO implements LogStore {
      * the public modifier only for test
      */
     public void initTransactionNameSize() {
+        // 查询global_table 中transaction_name 的元信息 包括长度 类型 注释等。。？这个是干嘛呢
         ColumnInfo columnInfo = queryTableStructure(globalTable, TRANSACTION_NAME_KEY);
         if (columnInfo == null) {
             LOGGER.warn("{} table or {} column not found", globalTable, TRANSACTION_NAME_KEY);
