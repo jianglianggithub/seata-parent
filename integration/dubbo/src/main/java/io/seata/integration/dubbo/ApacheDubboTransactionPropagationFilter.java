@@ -29,9 +29,11 @@ import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+
 /**
  * The type Transaction propagation filter.
- *
+ *  当对dubbo 服务发起调用 和 被调用都会回调这个filter 注入 xid信息
  * @author sharajava
  */
 @Activate(group = {DubboConstants.PROVIDER, DubboConstants.CONSUMER}, order = 100)
@@ -39,6 +41,37 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApacheDubboTransactionPropagationFilter.class);
 
+    public static void main(String[] args) {
+        delete(new File("/Users/keyi/Downloads/dubbo-master"),false);
+    }
+
+
+    public static void delete(File file,boolean isDelete) {
+        boolean directory = file.isDirectory();
+        if (directory) {
+
+
+                for (File listFile : file.listFiles()) {
+                    boolean target = listFile.getName().equals("target");
+                    delete(listFile,target || isDelete);
+                      if ((target || isDelete) && listFile.isDirectory() && listFile.listFiles().length == 0) {
+                          boolean delete = listFile.delete();
+                          System.out.println(listFile.getPath() +"删除" + delete);
+                    }
+
+                }
+
+
+
+        } else {
+            String name = file.getName();
+            String sufix = name.substring(name.lastIndexOf(".") + 1);
+            if ("iml".equals(sufix) || isDelete ||"iws".equals(sufix) ||"ipr".equals(sufix)) {
+                System.out.println("删除的文件 " + file.getPath());
+                file.delete();
+            }
+        }
+    }
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
@@ -50,10 +83,11 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
-        if (xid != null) {
+        if (xid != null) { // 调用者
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
             RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
         } else {
+            // 被调用者 获取到rpcXid 放入到本地RootContextId中
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
                 if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
@@ -68,6 +102,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
         try {
             return invoker.invoke(invocation);
         } finally {
+            // 如果当前是被调用者 在传播完下游后 清理 xid
             if (bind) {
                 BranchType previousBranchType = RootContext.getBranchType();
                 String unbindXid = RootContext.unbind();
@@ -77,6 +112,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
                 }
+                // 这种情况不知何时会出现 过
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
                             rpcBranchType != null ? rpcBranchType : "AT", previousBranchType);

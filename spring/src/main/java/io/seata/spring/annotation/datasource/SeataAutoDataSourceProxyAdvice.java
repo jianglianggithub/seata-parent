@@ -53,6 +53,7 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
+        // 是否拿到全局锁。暂时不知道啥情况
         if (!RootContext.requireGlobalLock()
                 && dataSourceProxyMode != RootContext.getBranchType()) {
             return invocation.proceed();
@@ -65,7 +66,8 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
         if (m != null) {
-            SeataDataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
+            SeataDataSourceProxy dataSourceProxy =
+                    DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
             return m.invoke(dataSourceProxy, args);
         } else {
             return invocation.proceed();

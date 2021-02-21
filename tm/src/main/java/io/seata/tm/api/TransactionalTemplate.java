@@ -133,11 +133,13 @@ public class TransactionalTemplate {
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
+                // 向TC 发起一次 事务会话 并且将 TC返回的 xid 全局事务id 存储在 RootContext 中
                 beginTransaction(txInfo, tx);
 
                 Object rs;
                 try {
                     // Do Your Business
+                    // 执行后续的 target.method()
                     rs = business.execute();
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
@@ -205,7 +207,12 @@ public class TransactionalTemplate {
     private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeCommit();
+
+
             tx.commit();
+
+
+
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit

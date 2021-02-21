@@ -47,12 +47,14 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         String xid = RootContext.getXID();
         BranchType branchType = RootContext.getBranchType();
 
+        // 如果在dubbo 的RpcContext 中获取到了 rpcXid 代表 当前 调用的不是 TM 事务边界 而是RM
         String rpcXid = getRpcXid();
         String rpcBranchType = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
+        // 如果xid 不等于null 代表 当前是TM role 否则是rm
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
             RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
@@ -74,12 +76,17 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
             if (bind) {
                 BranchType previousBranchType = RootContext.getBranchType();
                 String unbindXid = RootContext.unbind();
+
                 if (BranchType.TCC == previousBranchType) {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
                 }
+
+
+
+
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
                             rpcBranchType != null ? rpcBranchType : "AT", previousBranchType);
@@ -92,6 +99,10 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                         }
                     }
                 }
+
+
+
+
             }
         }
     }

@@ -49,6 +49,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         cacheKey.append(".");
         //remove single quote and separate it to catalogName and tableName
         String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
+        // 去除数据库名
         String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
         DatabaseMetaData databaseMetaData = null;
@@ -74,9 +75,15 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         return cacheKey.toString();
     }
 
+    public static void main(String[] args) {
+        String test = ColumnUtils.addEscape("test", JdbcConstants.MYSQL);
+
+        System.out.println(test);
+    }
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
+
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());

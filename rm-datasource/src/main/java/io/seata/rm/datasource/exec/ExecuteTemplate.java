@@ -62,10 +62,15 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
+
+
+    /* 需要注意一个问题。 就是 即使 是普通调用 */
     public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
+
+        //  如果不是AT 模式 直接 过 用原始 statment 执行
         if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
@@ -73,6 +78,7 @@ public class ExecuteTemplate {
 
         String dbType = statementProxy.getConnectionProxy().getDbType();
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
+            // 获取 sql 的解析树 ast sql的类型等等 相当于 jsqlparse
             sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
                     dbType);
@@ -85,9 +91,12 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                        executor = EnhancedServiceLoader.load(
+                                InsertExecutor.class,
+                                dbType,
                                 new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                                new Object[]{statementProxy, statementCallback, sqlRecognizer}
+                                );
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
@@ -103,6 +112,7 @@ public class ExecuteTemplate {
                         break;
                 }
             } else {
+                // 多语句执行
                 executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
             }
         }

@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -26,6 +27,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 
+import com.alibaba.druid.sql.parser.SQLParser;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
@@ -52,6 +54,14 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (MySqlUpdateStatement)ast;
+    }
+
+    public static void main(String[] args) {
+        List<SQLStatement> asts = SQLUtils.parseStatements("update table set a = 1, b = 2 where id = 2", "mysql");
+        SQLStatement sqlStatement = asts.get(0);
+        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer("update table set a = 1, b = 2 where id = 2", sqlStatement);
+        List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
+        System.out.println(updateColumns);
     }
 
     @Override

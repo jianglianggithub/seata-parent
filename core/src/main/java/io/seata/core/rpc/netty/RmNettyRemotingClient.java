@@ -74,6 +74,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             super.init();
 
             // Found one or more resources that were registered before initialization
+            // 如果有resource 直接重连 无需等待 定时器轮训  但是暂时不知道 resources 是什么jb东西
             if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
                     && StringUtils.isNotBlank(transactionServiceGroup)) {

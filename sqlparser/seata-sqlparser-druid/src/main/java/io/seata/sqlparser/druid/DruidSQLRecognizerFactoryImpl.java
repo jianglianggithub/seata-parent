@@ -35,12 +35,22 @@ import java.util.List;
  * @author ggndnn
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
+    public static void main(String[] args) {
+        List<SQLRecognizer> mysql = new DruidSQLRecognizerFactoryImpl().create("insert into test(id,name,descc,dept_id) values ('2','333','1',null)", "mysql");
+        SQLRecognizer sqlRecognizer = mysql.get(0);
+        String tableName = sqlRecognizer.getTableName();
+        System.out.println(tableName);
+    }
+
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
+
+        // 如果执行的sql  是一个多sql 比如 insert xxx ; insert xxxx  多条sql一次执行 必须 是 update delete 同一种类型
+        // insert 为什么没有呢。。。？ 不知道为什么insert 不支持 多条同时执行
         if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
                 || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
             throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);

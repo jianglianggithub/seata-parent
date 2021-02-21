@@ -22,21 +22,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
+
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -103,20 +90,51 @@ public abstract class AbstractConnectionProxy implements Connection {
         return new StatementProxy(this, targetStatement);
     }
 
+    public static void main(String[] args) throws Exception {
+
+        Connection connection= DriverManager.getConnection("jdbc:mysql://localhost:3306/student_db");
+
+        PreparedStatement preparedStatement= connection.prepareStatement("select * from student");
+
+        ResultSet resultSet=preparedStatement.executeQuery();
+        while (resultSet.next()){
+            System.out.println(resultSet.getString("sname"));
+        }
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+
+    }
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         String dbType = getDbType();
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
         if (BranchType.AT == RootContext.getBranchType()) {
+            // 解析sql 成 ast 语法树 然后 获取sql的执行类型 返回的list 可能是 一个sql 里面执行 的多条语句 但是类型一定是相同并且不是insert
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
+
             if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+
+                /**
+                 *  目前不知道这里为什么 要对insert 做特殊处理  返回自增的主键。。但是现在表基本都不是自增的吧
+                 */
+
                 if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
-                            sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
+                    // 获取到 table 的元信息
+                    TableMeta tableMeta = TableMetaCacheFactory
+                            .getTableMetaCache(dbType)
+                            .getTableMeta(
+                                getTargetConnection(),
+                                sqlRecognizer.getTableName(),
+                                // 这个 resourceId 就是数据库连接的url 不带参数
+                                getDataSourceProxy().getResourceId()
+                            );
+                    // 得到该表主键的数量
                     String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
                     tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
+                    // 执行sql 并且返回主键。 但是 有问题的是 如果不是自增的话是无法返回主键的。。。？
                     targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
                 }
             }

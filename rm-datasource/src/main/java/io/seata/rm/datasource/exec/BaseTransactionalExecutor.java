@@ -211,7 +211,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             return tableMeta;
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+        tableMeta = TableMetaCacheFactory
+                .getTableMetaCache(connectionProxy.getDbType())
             .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }

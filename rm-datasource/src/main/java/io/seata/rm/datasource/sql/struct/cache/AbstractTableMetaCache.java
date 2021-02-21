@@ -44,8 +44,12 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
     private static final long EXPIRE_TIME = 900 * 1000;
 
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder()
+            .maximumSize(CACHE_SIZE)
+            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS)
+            // 软引用 当jvm内存不够的时候回收
+            .softValues()
+            .build();
 
 
     @Override

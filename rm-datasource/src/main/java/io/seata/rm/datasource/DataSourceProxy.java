@@ -105,7 +105,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        // 将dataSource 注册城资源 动作意义未明确。 这个只是第一次执行的时候 才会 将 资源上报 不清不知道意义在哪儿
         DefaultResourceManager.get().registerResource(this);
+        // 自动刷新缓存中的表结构
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
@@ -139,6 +141,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         return dbType;
     }
 
+
+    /**
+     *   需要注意的一个问题是 在使用seata 后 由于 对数据源做了代理 在没有 处于 分支事务的时候 也会 创建代理 ？？？？？
+     */
     @Override
     public ConnectionProxy getConnection() throws SQLException {
         Connection targetConnection = targetDataSource.getConnection();

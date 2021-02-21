@@ -292,7 +292,7 @@ public class ChannelManager {
         return null;
 
     }
-
+    //  能解释这个fun 的 理由应该是 如果 对应tm 通道不活跃 换一个 同样appname ip 不同端口 可能重连了 。
     private static Channel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
         if (clientChannelMap != null && !clientChannelMap.isEmpty()) {
             for (ConcurrentMap.Entry<Integer, RpcContext> entry : clientChannelMap.entrySet()) {
