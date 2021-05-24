@@ -79,9 +79,7 @@ public class ExecuteTemplate {
         String dbType = statementProxy.getConnectionProxy().getDbType();
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
             // 获取 sql 的解析树 ast sql的类型等等 相当于 jsqlparse
-            sqlRecognizers = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    dbType);
+            sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(),dbType);
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {

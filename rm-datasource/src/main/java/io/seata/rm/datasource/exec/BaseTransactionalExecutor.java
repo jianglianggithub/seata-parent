@@ -104,6 +104,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public T execute(Object... args) throws Throwable {
+        // 设置全局事务id 并且设置是否开启全局锁机制  @GlobLock 会有这个东西不过现在也不完全清楚
         String xid = RootContext.getXID();
         if (xid != null) {
             statementProxy.getConnectionProxy().bind(xid);
@@ -162,6 +163,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * Gets several column name in sql.
+     *  如果表中带有别名的话 就要弄成 xxxx.xxxx 这样
      *
      * @param columnNameList the column name
      * @return the column name in sql
@@ -274,6 +276,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+        // 得到受影响的rows的table+pk 格式化的字符串
         String lockKeys = buildLockKey(lockKeyRecords);
         connectionProxy.appendLockKey(lockKeys);
 
@@ -285,7 +288,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build lockKey
      *
      * @param rowsIncludingPK the records
-     * @return the string as local key. the local key example(multi pk): "t_user:1_a,2_b"
+     * @return the string as local key. the local key example(multi pk): "t_user:1_a,2_b"  之所以是 x_y_z,q_w_e 因为会有多主键的可能
      */
     protected String buildLockKey(TableRecords rowsIncludingPK) {
         if (rowsIncludingPK.size() == 0) {

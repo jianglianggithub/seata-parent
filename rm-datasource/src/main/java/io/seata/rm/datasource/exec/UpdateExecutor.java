@@ -68,17 +68,27 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords beforeImage() throws SQLException {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
+        // 构建出 update 操作 所影响到的 rows 并且要 在 返回的 filed 中 加上主键
         String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);
         return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
+        // ast 信息
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        // 获取更新的 field
+        // 获取更新的 field  update table set filed1 = ? , filed2 = ? where id = ? 里面的 filed1 和 filed2 如果是带 别名的 就是 别名.filed 不是原表名
         List<String> updateColumns = recognizer.getUpdateColumns();
+
+        // 如果更新的包含主键信息 那么直接抛出异常
         assertContainsPKColumnName(updateColumns);
+
+
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        // 获取 where aaa = 1 and ssss = 'aa' 获取where 后面的条件  并且 用 \n 分隔开
+        // 并且 获取 对应索引 下的列值 但是 为什么 paramAppenderList 是一个list没搞明白
+        // 获取 update table set aaa='1' where userid = ?
+        //  拿到where 条件 并且 把 paramMap 中的 参数 放到 paramAppenderList index 0 的list 中
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
@@ -94,6 +104,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
+        /**
+         *  如果update set a.filed , a.filed1 where condition = ?
+         *  如果 ONLY_CARE_UPDATE_COLUMNS true 代表 在 预查询出 操作sql 之前的镜像 的 sql 只 查询 update 中的 列。
+         *  但是如果 update 中的列不包含 主键 通过 update 中原始的条件 并且到 select 中 并且返回这些 数据的主键信息
+         */
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(updateColumns)) {
                 selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
@@ -118,6 +133,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            // 把问号变为 主键实参
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
@@ -126,6 +142,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
     }
 
+    // 查询出更新之后的数据 的sql 还未注入 主键
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
         StringBuilder prefix = new StringBuilder("SELECT ");
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());

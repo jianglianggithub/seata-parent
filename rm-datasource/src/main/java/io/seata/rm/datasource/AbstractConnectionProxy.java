@@ -110,6 +110,7 @@ public abstract class AbstractConnectionProxy implements Connection {
         String dbType = getDbType();
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
+        // 判断是否有全局事务XID  因为可能被调用的时候 并不需要 开启全局事务的 fun 执行的 sql
         if (BranchType.AT == RootContext.getBranchType()) {
             // 解析sql 成 ast 语法树 然后 获取sql的执行类型 返回的list 可能是 一个sql 里面执行 的多条语句 但是类型一定是相同并且不是insert
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);

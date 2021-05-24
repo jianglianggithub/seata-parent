@@ -18,10 +18,7 @@ package io.seata.sqlparser.druid.mysql;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.expr.*;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
@@ -57,11 +54,19 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     public static void main(String[] args) {
-        List<SQLStatement> asts = SQLUtils.parseStatements("update table set a = 1, b = 2 where id = 2", "mysql");
+        List<SQLStatement> asts = SQLUtils.parseStatements("update table s set s.a = 1, s.b = 2 where id = 2 and s='asd'", "mysql");
         SQLStatement sqlStatement = asts.get(0);
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer("update table set a = 1, b = 2 where id = 2", sqlStatement);
+        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer("update table s set s.a = 1, s.b = 2 where id = 2", sqlStatement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        System.out.println(updateColumns);
+        SQLBinaryOpExpr where = (SQLBinaryOpExpr) mySQLUpdateRecognizer.ast.getWhere();
+        StringBuilder stringBuilder = new StringBuilder();
+
+        MySqlOutputVisitor mySqlOutputVisitor = new MySqlOutputVisitor(stringBuilder);
+        boolean visit = mySqlOutputVisitor.visit(where);
+        String s = stringBuilder.toString();
+        System.out.println(s);
+
+
     }
 
     @Override

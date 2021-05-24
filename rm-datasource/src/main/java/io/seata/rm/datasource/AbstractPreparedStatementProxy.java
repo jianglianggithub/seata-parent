@@ -102,6 +102,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param x     the x
      */
     protected void setParamByIndex(int index, Object x) {
+        // 这里为什么要用list 装一个 index 下的唯一值 不明白
         CollectionUtils.computeIfAbsent(parameters, index, e -> new ArrayList<>())
                 .add(x);
     }

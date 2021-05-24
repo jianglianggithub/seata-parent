@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @param <S> the type parameter
  * @author sharajava
  */
-public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
+public abstract class  AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
 
@@ -98,8 +98,11 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
+        // 对操作的sql 梭影响到的行数的 rows 查询出来
         TableRecords beforeImage = beforeImage();
+        // 执行 target method
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+        // 将受影响行数 在 执行完之后在通过主键查询出来
         TableRecords afterImage = afterImage(beforeImage);
         prepareUndoLog(beforeImage, afterImage);
         return result;

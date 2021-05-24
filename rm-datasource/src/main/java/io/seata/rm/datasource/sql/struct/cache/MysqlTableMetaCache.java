@@ -76,9 +76,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     public static void main(String[] args) {
-        String test = ColumnUtils.addEscape("test", JdbcConstants.MYSQL);
 
-        System.out.println(test);
     }
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {

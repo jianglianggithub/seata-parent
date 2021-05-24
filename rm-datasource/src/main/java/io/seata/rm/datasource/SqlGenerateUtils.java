@@ -17,9 +17,11 @@ package io.seata.rm.datasource;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import io.seata.rm.datasource.sql.struct.Field;
 
 /**
@@ -40,10 +42,23 @@ public class SqlGenerateUtils {
         return buildWhereConditionByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
 
     }
+
+    public static void main(String[] args) throws SQLException {
+        ArrayList<String> objects = new ArrayList<>();
+        objects.add("id");
+        objects.add("name");
+        String mysql = buildWhereConditionByPKs(objects, 100, "mysql", 1000);
+        System.out.println(mysql);
+    }
     /**
      * each pk is a condition.the result will like :" (id,userCode) in ((?,?),(?,?)) or (id,userCode) in ((?,?),(?,?)
      * ) or (id,userCode) in ((?,?))"
      * Build where condition by pks string.
+     * maxinsize 其实是最大 的 (pkFiled) in (x,x,x)
+     * 但是不知道为什么 一次in 最多 1000个 不知道为啥
+     * Oracle SQL 语句in长度不得超过1000
+     * see https://learnku.com/articles/41387
+     * 这里是为了适配 oracle 最大in = 1000 mysql 是4m 大概2000
      *
      * @param pkNameList pk column name list
      * @param rowSize    the row size of records
@@ -70,8 +85,12 @@ public class SqlGenerateUtils {
             }
             whereStr.append(") in ( ");
 
-            int eachSize = (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
-                : maxInSize;
+            // 这里就是 加入 你  in个主键个数 为 2700 那么 一次1000 最后一批 取模 就得出 700 0 - 699 正好 700 个
+            int eachSize = (batch == batchSize - 1) ?
+                    (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
+                        :
+                    maxInSize;
+
             for (int i = 0; i < eachSize; i++) {
                 //each row is a bracket
                 if (i > 0) {

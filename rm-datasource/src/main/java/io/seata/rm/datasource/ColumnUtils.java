@@ -106,6 +106,11 @@ public final class ColumnUtils {
         return newColName;
     }
 
+    public static void main(String[] args) {
+        String str = "'table'.aa";
+        System.out.println(str.indexOf("'."));
+        delEscape(str,Escape.MYSQL);
+    }
     /**
      * del escape by escape
      *
@@ -118,10 +123,12 @@ public final class ColumnUtils {
             return colName;
         }
 
+        // 如果是 'field' "filed" 这样的
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             // like "scheme"."id" `scheme`.`id`
             String str = escape.value + DOT + escape.value;
             int index = colName.indexOf(str);
+            // 如果 有 "table_alias"."aaa"  转成 filed.aaa  不带引号这种
             if (index > -1) {
                 return colName.substring(1, index) + DOT + colName.substring(index + str.length(), colName.length() - 1);
             }
@@ -187,6 +194,7 @@ public final class ColumnUtils {
 
     /**
      * if necessary, add escape
+     * .... 如果你的 filed 是关键字.xxxx 那么 把  关键字加上 `关键字`.`xx`  这样mysql不会报错。。。佛了
      *
      * @param colName the column name
      * @param escape  the escape
@@ -202,6 +210,7 @@ public final class ColumnUtils {
 
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(dbType);
         if (keywordChecker != null) {
+            // 是否是数据库的关键字
             boolean check = keywordChecker.checkEscape(colName);
             if (!check) {
                 return colName;
