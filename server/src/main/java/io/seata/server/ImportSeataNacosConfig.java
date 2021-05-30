@@ -1,7 +1,7 @@
 package io.seata.server;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.http.HttpUtil;
+//import cn.hutool.core.io.FileUtil;
+//import cn.hutool.http.HttpUtil;
 import com.google.common.primitives.Chars;
 
 import java.io.File;
