@@ -104,7 +104,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     protected final List<RpcHook> rpcHooks = EnhancedServiceLoader.loadAll(RpcHook.class);
 
-    // 定时清除 超时的 futures 避免内存泄漏  这个东西 在 rocketmq 中有相同的策略机制
+    // 定时清除 超时的 futures 避免内存泄漏  这个东西 在 rocketmq 中有相同的策略机制 突然发现他好像没有删除这个 entry...我记得rocket里面是有删除的啊?
     public void init() {
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override

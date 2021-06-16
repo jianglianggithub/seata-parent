@@ -85,6 +85,7 @@ public class Server {
         // 初始化 存储模型  一般配置中写的是为db
         SessionHolder.init(parameterParser.getStoreMode());
 
+        // 全局事务提交回滚控制器
         DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
@@ -93,6 +94,8 @@ public class Server {
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
+
+        // 下面是生成xid 的加上 host port
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());

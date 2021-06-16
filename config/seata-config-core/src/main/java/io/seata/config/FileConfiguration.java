@@ -105,6 +105,7 @@ public class FileConfiguration extends AbstractConfiguration {
      */
     public FileConfiguration(String name, boolean allowDynamicRefresh) {
         LOGGER.info("The file name of the operation is {}", name);
+        // 获取本地的 register.conf
         File file = getConfigFile(name);
         if (file == null) {
             targetFilePath = null;
@@ -135,6 +136,10 @@ public class FileConfiguration extends AbstractConfiguration {
      *   .这个没有支持 JAR 协议的 classpath 文件。
      *    如果打包成 一个jar  就报错了。
      *    不过基本上都是 配置文件 分离的。
+     *
+        后面理解
+     classpath
+     ./conf:./lib/*  由于打包方式是把配置和 jar 分开打包的 所以不会有我那个问题 启动脚本就手动指定了classpath
      */
     private File getConfigFile(String name) {
         try {
