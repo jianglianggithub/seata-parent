@@ -73,7 +73,7 @@ public class SeataAutoConfiguration {
     }
 
     /**
-     * The data source configuration.
+     * 这个配置类主要是为了 给dataSource创建代理使用了2个 后置处理器
      */
     @Configuration
     @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
@@ -82,7 +82,7 @@ public class SeataAutoConfiguration {
         /**
          * The bean seataDataSourceBeanPostProcessor.
          *
-                这个只是缓存代理对象。   搞2个我觉得有些多余？
+                缓存代理对象 将所有dataSource 都返回一个 dataSourceProxy
          *
          */
         @Bean(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)
@@ -92,7 +92,8 @@ public class SeataAutoConfiguration {
         }
 
         /**
-         *  这个是 给dataSource创建代理
+         *  这个是 给dataSource创建代理 当 targetSource 的 method 在 proxySource 中有的时候先执行 代理中的 method
+         *   主要用于将返回的 connection 也一样进行代理。
          */
         @Bean(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)
         @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
