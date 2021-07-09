@@ -74,6 +74,11 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
         }
     }
 
+
+    /**
+     *  这个主要是 让所有 代理的 datasource 实现这个接口
+     * @return
+     */
     @Override
     public Class<?>[] getInterfaces() {
         return new Class[]{SeataProxy.class};
