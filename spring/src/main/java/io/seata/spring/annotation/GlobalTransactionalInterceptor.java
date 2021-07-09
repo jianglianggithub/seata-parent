@@ -169,7 +169,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             // 找到 真实的Method  不是 Bridged 的Method
             final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-
+            //asd
             final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             // 如果已经关闭了全局事务 或者重试次数 超过了指定次数
