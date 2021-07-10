@@ -372,7 +372,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
-     * Init.
+     *  todo 对未处理的全局事务做一个定时查询 全局提交回滚啥的 这个需要在主流程比较熟悉之后在看
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {

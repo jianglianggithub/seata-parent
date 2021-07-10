@@ -86,6 +86,11 @@ public class SessionHolder {
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
         StoreMode storeMode = StoreMode.get(mode);
+
+        /**
+            这个是初始化全局事务会话信息数据保存的模式
+         */
+
         if (StoreMode.DB.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
@@ -125,8 +130,8 @@ public class SessionHolder {
         }
 
 
-        /**
-         *   这个地方 有对于 宕机重启 的处理。 因为不了解整体流程 需要后续了解后 在看
+        /*
+          todo 这个地方 有对于 宕机重启 的处理。 因为不了解整体流程 需要后续了解后 在看
          */
         reload(storeMode);
     }

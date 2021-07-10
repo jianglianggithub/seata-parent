@@ -71,7 +71,7 @@ public final class ConfigurationFactory {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
 
-
+        // 获取默认的register.conf 并且加载 如果有的话
         Configuration configuration =
                 (envValue == null)
                         ?
@@ -150,6 +150,7 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
+                // 因为你可能 type为file 但是 在spring boot 比如yml中已经配置了 写死的值的情况 就像提供的demo中的样子
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}", extConfiguration == null
