@@ -49,14 +49,6 @@ public enum ObjectHolder {
                 new ShouldNeverHappenException("Can't find any object of class " + clasz.getName())));
     }
 
-    public static void main(String[] args) {
-        List<String> rs = new ArrayList<>();
-        rs.add("1");
-        rs.add("2");
-        Optional<String> any = rs.stream().filter(String.class::isInstance).findAny();
-        String s = any.get();
-
-    }
     /**
      * Sets object.
      *

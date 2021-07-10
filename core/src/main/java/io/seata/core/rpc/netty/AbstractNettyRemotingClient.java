@@ -106,6 +106,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
+
+
+
     @Override
     public void init() {
 
@@ -162,6 +165,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             // put message into basketMap
             BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
                 key -> new LinkedBlockingQueue<>());
+            /**
+             *             BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
+             *                     new Function<Object, BlockingQueue<RpcMessage>>() {
+             *                         @Override
+             *                         public BlockingQueue<RpcMessage> apply(Object s) {
+             *                             return new LinkedBlockingQueue<>();
+             *                         }
+             *                     });
+             */
             basket.offer(rpcMessage);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());

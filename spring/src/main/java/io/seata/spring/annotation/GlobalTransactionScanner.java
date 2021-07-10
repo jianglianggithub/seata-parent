@@ -205,6 +205,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
+
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }
