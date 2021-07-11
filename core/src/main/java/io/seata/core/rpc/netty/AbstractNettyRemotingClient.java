@@ -121,7 +121,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
 
 
-        // 消息批量发送
+        // 消息批量发送会有一个单线程 线程池去专门处理
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,

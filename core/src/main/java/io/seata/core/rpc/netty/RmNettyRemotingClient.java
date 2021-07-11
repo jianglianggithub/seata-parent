@@ -58,6 +58,10 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);
+    /**
+     * 这里的resourceManager 是每一个 RM 管理者不同的 BrandType 的资源 因为痛一个 rm clinet 可以同时存在多种分布式事务模型，
+     * 自然可以根据不同的 brandType 来处理不同的 分支事务 只要定义好了 分支注册 , 回滚 提交 具体细节 就可以让不同的 资源自行处理 不管你是关系型数据库 还是 中间件 还是 非关系型数据库 等等
+     */
     private ResourceManager resourceManager;
     private static volatile RmNettyRemotingClient instance;
     private final AtomicBoolean initialized = new AtomicBoolean(false);

@@ -34,7 +34,7 @@ public class RMClient {
         RmNettyRemotingClient rmNettyRemotingClient =
                 RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
-        /* 这2个东西不知道是干嘛的  */
+        /* 这2个东西不知道是干嘛的 */
         rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
         rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
 
