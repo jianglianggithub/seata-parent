@@ -33,7 +33,7 @@ public interface Resource {
     /**
      * Get the resource id.
      * e.g. url of a data-source could be the id of the db data-source resource.
-     *
+     * 这个id 其实就是 url 比如jdbc的连接url
      * @return resource id.
      */
     String getResourceId();

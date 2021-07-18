@@ -139,13 +139,16 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
      */
     protected abstract ResourceManager getResourceManager();
 
+    /**
+     * 这个只是一个统一的入口 ...用了点设计模式 去调用上面真实的 method、、handle Request
+     */
     @Override
     public AbstractResultMessage onRequest(AbstractMessage request, RpcContext context) {
         if (!(request instanceof AbstractTransactionRequestToRM)) {
             throw new IllegalArgumentException();
         }
         AbstractTransactionRequestToRM transactionRequest = (AbstractTransactionRequestToRM)request;
-        transactionRequest.setRMInboundMessageHandler(this);
+        transactionRequest.setRMInboundMessageHandler(this); // 这个this = DefaultRMHandle...意义你不大
 
         return transactionRequest.handle(context);
     }

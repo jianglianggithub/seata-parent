@@ -105,7 +105,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
-        // 将dataSource 注册城资源 动作意义未明确。 这个只是第一次执行的时候 才会 将 资源上报 不清不知道意义在哪儿
+        // this = DataSourceProxy 是 db Resource 的一种 所以将自己 register 给 DataSourceResourceManager 进行管理 分支注册 等等操作
         DefaultResourceManager.get().registerResource(this);
         // 自动刷新缓存中的表结构
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
@@ -161,6 +161,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     public String getResourceGroupId() {
         return resourceGroupId;
     }
+
 
     @Override
     public String getResourceId() {
