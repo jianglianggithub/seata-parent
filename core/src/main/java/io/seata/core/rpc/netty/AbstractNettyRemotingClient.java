@@ -101,6 +101,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 
     private final NettyClientBootstrap clientBootstrap;
+    /**
+     * 集成了 channel管理连接 释放
+     */
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;

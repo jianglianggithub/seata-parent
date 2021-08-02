@@ -54,7 +54,7 @@ class NettyClientChannelManager {
 
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
 
-    // 一个对象池
+    // 这里采用对象池 我觉得只是单纯的把 连接 释放 这些步骤隔离了解耦具体作用不大
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
 
     private Function<String, NettyPoolKey> poolKeyFunction;
@@ -107,6 +107,13 @@ class NettyClientChannelManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("will connect to " + serverAddress);
         }
+
+        /**
+         *  为什么创建服务端连接的时候需要加锁
+         *  因为 不同的事务都是由不同的线程操作clinet去执行的这个时候会有并发的情况
+         *  如果不加锁会创建很多连接同一时刻创建很多 channel 所以需要加锁
+         *  但是seata里面的加锁 比 dubbo rocketmq 里面会更复杂一点
+         */
         Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
         synchronized (lockObj) {
             return doConnect(serverAddress);
@@ -226,7 +233,7 @@ class NettyClientChannelManager {
             NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
 
 
-            // 这里不知道原因。 貌似是处理 RM 的逻辑的  如果不是 第一次连接 那么后续 创建的 registerReuqest 重连请求 采用之前的 resourceId
+            // 这里不知道原因。 貌似是处理 RM 的逻辑的  如果不是 第一次连接 那么前面 创建的 registerReuqest 重连请求 采用后面的 resourceId
             if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
                 RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
                 ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
@@ -252,6 +259,10 @@ class NettyClientChannelManager {
                                          .collect(Collectors.toList());
     }
 
+
+    /**
+     * 这里之所以等待是因为可能出现网络抖动,
+     */
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {
         if (rmChannel.isActive()) {
             return rmChannel;

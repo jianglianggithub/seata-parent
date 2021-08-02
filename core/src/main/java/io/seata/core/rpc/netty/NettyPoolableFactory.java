@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
 
     private final AbstractNettyRemotingClient rpcRemotingClient;

@@ -21,6 +21,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
@@ -37,6 +38,7 @@ import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,6 +46,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -78,7 +81,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             super.init();
 
             // Found one or more resources that were registered before initialization
-            // 如果有resource 直接重连 无需等待 定时器轮训  但是暂时不知道 resources 是什么jb东西
+            //
             if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
                     && StringUtils.isNotBlank(transactionServiceGroup)) {
