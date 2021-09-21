@@ -43,8 +43,7 @@ import io.seata.serializer.protobuf.convertor.RegisterRMRequestConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterRMResponseConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMRequestConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMResponseConvertor;
-import io.seata.serializer.protobuf.generated.GlobalReportRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalReportResponseProto;
+import io.seata.serializer.protobuf.generated.*;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
@@ -53,32 +52,6 @@ import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.serializer.protobuf.convertor.UndoLogDeleteRequestConvertor;
-import io.seata.serializer.protobuf.generated.BranchCommitRequestProto;
-import io.seata.serializer.protobuf.generated.BranchCommitResponseProto;
-import io.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
-import io.seata.serializer.protobuf.generated.BranchRegisterResponseProto;
-import io.seata.serializer.protobuf.generated.BranchReportRequestProto;
-import io.seata.serializer.protobuf.generated.BranchReportResponseProto;
-import io.seata.serializer.protobuf.generated.BranchRollbackRequestProto;
-import io.seata.serializer.protobuf.generated.BranchRollbackResponseProto;
-import io.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalBeginResponseProto;
-import io.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalCommitResponseProto;
-import io.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalLockQueryResponseProto;
-import io.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalRollbackResponseProto;
-import io.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
-import io.seata.serializer.protobuf.generated.GlobalStatusResponseProto;
-import io.seata.serializer.protobuf.generated.HeartbeatMessageProto;
-import io.seata.serializer.protobuf.generated.MergedResultMessageProto;
-import io.seata.serializer.protobuf.generated.MergedWarpMessageProto;
-import io.seata.serializer.protobuf.generated.RegisterRMRequestProto;
-import io.seata.serializer.protobuf.generated.RegisterRMResponseProto;
-import io.seata.serializer.protobuf.generated.RegisterTMRequestProto;
-import io.seata.serializer.protobuf.generated.RegisterTMResponseProto;
-import io.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -120,6 +93,8 @@ public class ProtobufConvertManager {
 
         static {
             final ProtobufConvertManager protobufConvertManager = new ProtobufConvertManager();
+
+
             protobufConvertManager.convertorMap.put(GlobalBeginRequest.class.getName(),
                 new GlobalBeginRequestConvertor());
             protobufConvertManager.convertorMap.put(BranchCommitRequest.class.getName(),
@@ -162,7 +137,6 @@ public class ProtobufConvertManager {
                 new GlobalReportResponseConvertor());
             protobufConvertManager.convertorMap.put(UndoLogDeleteRequest.class.getName(),
                 new UndoLogDeleteRequestConvertor());
-
             protobufConvertManager.convertorMap.put(MergedWarpMessage.class.getName(),
                 new MergedWarpMessageConvertor());
             protobufConvertManager.convertorMap.put(HeartbeatMessage.class.getName(), new HeartbeatMessageConvertor());
@@ -176,6 +150,10 @@ public class ProtobufConvertManager {
                 new RegisterTMRequestConvertor());
             protobufConvertManager.convertorMap.put(RegisterTMResponse.class.getName(),
                 new RegisterTMResponseConvertor());
+
+
+
+
 
             protobufConvertManager.protoClazzMap.put(GlobalBeginRequestProto.getDescriptor().getFullName(),
                 GlobalBeginRequestProto.class);

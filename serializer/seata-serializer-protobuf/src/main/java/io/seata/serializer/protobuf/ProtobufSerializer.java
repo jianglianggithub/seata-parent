@@ -19,6 +19,8 @@ import com.google.protobuf.GeneratedMessageV3;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.protobuf.convertor.PbConvertor;
+import io.seata.serializer.protobuf.generated.AbstractGlobalEndRequest;
+import io.seata.serializer.protobuf.generated.AbstractGlobalEndRequestProto;
 import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
 import java.nio.ByteBuffer;
@@ -44,6 +46,7 @@ public class ProtobufSerializer implements Serializer {
         //translate to pb
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
             t.getClass().getName());
+
         //for cross language,write FullName to data,which defines in proto file
         GeneratedMessageV3 newBody = (GeneratedMessageV3)pbConvertor.convert2Proto(t);
         byte[] body = ProtobufInnerSerializer.serializeContent(newBody);

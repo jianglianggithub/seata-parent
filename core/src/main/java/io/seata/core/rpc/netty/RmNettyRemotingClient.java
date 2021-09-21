@@ -85,6 +85,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
                     && StringUtils.isNotBlank(transactionServiceGroup)) {
+                // 初始化 与 tc 的所有channels 并且cache
                 getClientChannelManager().reconnect(transactionServiceGroup);
             }
         }

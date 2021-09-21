@@ -128,6 +128,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
 
+
+        /**
+         *  这个地方就是官网 附录6所说的东西。 后续在看 服务降级相关
+         *  具体不知道降级啥。
+         */
         if (degradeCheck) {
             ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
             // 下面是重式 次数 和 间隔时间
@@ -139,9 +144,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             // 一个监听机制
             EVENT_BUS.register(this);
 
-            /**
-             *  这个地方就是官网 附录6所说的东西。 后续在看 服务降级相关
-             */
+
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
             }

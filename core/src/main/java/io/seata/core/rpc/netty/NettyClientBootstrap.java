@@ -122,6 +122,8 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 .option(ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize())
                 .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
 
+
+
         if (nettyClientConfig.enableNative()) {
             if (PlatformDependent.isOsx()) {
                 if (LOGGER.isInfoEnabled()) {

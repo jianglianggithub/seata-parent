@@ -191,6 +191,8 @@ public class ChannelManager {
 
         for (String resourceId : dbkeySet) {
             String clientIp;
+
+            //  resourceId -> ApplicationId -> clientIp -> port -> channel 主要是保证获取resource对应通道的唯一性
             ConcurrentMap<Integer, RpcContext> portMap =
                     CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(resourceManagerRequest.getApplicationId(), key -> new ConcurrentHashMap<>())
@@ -201,18 +203,27 @@ public class ChannelManager {
         }
     }
 
+    /**
+     * 找到resourceId 不同 但是 applicationId clientIp 相同 的 rm-client 端口不一致 会纳入到 新的 resourceId 对应的 map中去
+     *
+     *
+     */
     private static void updateChannelsResource(String resourceId, String clientIp, String applicationId) {
         ConcurrentMap<Integer, RpcContext> sourcePortMap = RM_CHANNELS.get(resourceId).get(applicationId).get(clientIp);
-        for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
-            RpcContext>>>> rmChannelEntry : RM_CHANNELS.entrySet()) {
+        for (
+                ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>> rmChannelEntry
+                :
+                RM_CHANNELS.entrySet()
+        ) {
             if (rmChannelEntry.getKey().equals(resourceId)) { continue; }
-            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
-                RpcContext>>> applicationIdMap = rmChannelEntry.getValue();
+            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap = rmChannelEntry.getValue();
+
             if (!applicationIdMap.containsKey(applicationId)) { continue; }
-            ConcurrentMap<String, ConcurrentMap<Integer,
-                RpcContext>> clientIpMap = applicationIdMap.get(applicationId);
+            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> clientIpMap = applicationIdMap.get(applicationId);
+
             if (!clientIpMap.containsKey(clientIp)) { continue; }
             ConcurrentMap<Integer, RpcContext> portMap = clientIpMap.get(clientIp);
+            // 这里之所以会遍历找到 不同resourceId 但是 applicationId clientIp 是相同的情况下 可能就是 同一个客户端
             for (ConcurrentMap.Entry<Integer, RpcContext> portMapEntry : portMap.entrySet()) {
                 Integer port = portMapEntry.getKey();
                 if (!sourcePortMap.containsKey(port)) {
@@ -221,6 +232,7 @@ public class ChannelManager {
                     rpcContext.holdInResourceManagerChannels(resourceId, port);
                 }
             }
+
         }
     }
 

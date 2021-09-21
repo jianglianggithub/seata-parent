@@ -131,6 +131,13 @@ class NettyClientChannelManager {
         try {
             synchronized (channelLocks.get(serverAddress)) {
                 Channel ch = channels.get(serverAddress);
+                /**
+                 *  这一块地方有3种情况
+                 *  从get到channel 失效 => lock => getChannel
+                 *  1. ch == null 代表已经有之前的线程释放了 并且remove cache
+                 *  如果相同代表 在此之前没有线程操作 可以 删除cache 并且释放
+                 *  前面有线程创建了新的连接 并且cache了
+                 */
                 if (ch == null) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
                     return;
