@@ -26,6 +26,8 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+
 import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
@@ -94,7 +96,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void begin(int timeout, String name) throws TransactionException {
 
-        // 基础状态监测
+        // 只有TM 才能发起开启一个全局事务
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -108,9 +110,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException("Global transaction already exists," +
                 " can't begin a new global transaction, currentXid = " + currentXid);
         }
-
-
-
 
 
         xid = transactionManager.begin(null, null, name, timeout);

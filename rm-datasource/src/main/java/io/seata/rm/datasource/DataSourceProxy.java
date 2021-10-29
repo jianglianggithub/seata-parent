@@ -144,6 +144,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     /**
      *   需要注意的一个问题是 在使用seata 后 由于 对数据源做了代理 在没有 处于 分支事务的时候 也会 创建代理 ？？？？？
+     *   seata 默认使用的 DataSourceXA 所以这里没做处理
      */
     @Override
     public ConnectionProxy getConnection() throws SQLException {

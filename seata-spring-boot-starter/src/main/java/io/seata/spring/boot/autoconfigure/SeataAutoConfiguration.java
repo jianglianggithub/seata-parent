@@ -103,7 +103,7 @@ public class SeataAutoConfiguration {
         }
 
         /**
-         *  上面2个后置处理器只为了实现一个bean对象就是
+            上面2个后置处理器只为了实现一个bean对象就是
                 不明白为什么搞2个后置处理器？
              @Bean
              public DataSourceProxy dataSourceProxy(DruidDataSource druidDataSource) {

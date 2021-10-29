@@ -124,16 +124,14 @@ public class TransactionalTemplate {
                 tx = GlobalTransactionContext.createNew();
             }
 
-            // 缓存事务信息
-            /**
-             *  这个动作 意义未明确 后续 需要回来看一下
-             */
+            // 暴露全局事务信息 可供业务使用。类似spring aop context
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
 
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
                 // 向TC 发起一次 事务会话 并且将 TC返回的 xid 全局事务id 存储在 RootContext 中
+                // 随后执行分支事务进行事务传播 的时候只需要 RootContext中拿到全局事务id 去传播即可
                 beginTransaction(txInfo, tx);
 
                 Object rs;
